@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Chris's Sickbeard Show Updater</title>
+    <script src="mootools-core-1.4.5-full-compat-yc" type="text/javascript"></script>
+    <script src="Request.JSONP.js" type="text/javascript"></script>
+</head>
+<body>
+    <p>There is nothing to see here.</p><p>/chris</p>
+</body>
+<script type="text/javascript">
+
+    //set up the constants
+    var options         = {};
+
+    //protocol (http/https)
+    options.protocol    = "http";
+
+    //url to the sickbeard server
+    options.url         = "";
+
+    //sickbeard port
+    options.port        = "8081";
+
+    //api key (get from sickbeard config)
+    options.api_key     = "";
+
+    //add an event for when the page loads
+    window.addEvent('load', function() {
+
+        //get the shows
+        var show_request    = new Request.JSONP({
+            "url"           : options.protocol + "://" + options.url + ":" + options.port + "/api/" + options.api_key + "/?cmd=shows",
+            "onComplete"    : function(returned_data) {
+
+                //for each of the returned shows
+                Object.each(returned_data.data, function(show) {
+
+                    //get the show status
+                    var show_status     = show.status;
+
+                    //if we are continuing
+                    if (show_status.toLowerCase() == "continuing") {
+
+                        //get the id
+                        var dbid        = show.tvdbid;
+
+                        //make a call to update that show
+                        var temp        = new Request.JSONP({
+                            "url"       : options.protocol + "://" + options.url + ":" + options.port + "/api/" + options.api_key + "/?cmd=show.update&tvdbid=" + dbid,
+                            "onComplete"    : function(result) {
+                                //we don't do anything. 
+                                //@todo: maybe notification if fails? not sure if any point
+                            }
+                        }).send();
+                    }
+                });
+            }
+        }).send();
+    })
+</script>
+</html>
